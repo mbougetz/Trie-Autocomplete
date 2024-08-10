@@ -9,13 +9,14 @@ class Node{
     }
 }
 
-//Global counter for number of suggestions retrieved in one pass
-let words_retrieved = 0;
+//Trie data structure
 class Trie{
+    //Constructs the trie by defining a root node
     constructor(root_node){
         this.root = root_node;
     }
 
+    //Inserts a string into the trie starting at the indicated node
     insert_string(curr_node, word){
         if(word.length > 0){
             let next_node;
@@ -36,41 +37,52 @@ class Trie{
         }
     }
 
-    //Returns the top MAX_SUGGESTIONS number of words after the given prefix in the dictionary
+    //Returns an array of length <= MAX_SUGGESTIONS of dictionary suggestions based on the current prefix
     getSuggestions(prefix) {
-        //Reset counter of words already retrieved
-        words_retrieved = 0;
+        const results = [];
+        const queue = [];
 
-        //Ensure prefix exists in trie before searching for suggestions
+        //Track number of previously retrieved nodes
+        let words_retrieved = 0;
+
+        //Start with the node corresponding to the last character of the prefix
         let node = this.root;
-        for (let char of prefix) {
-            //No suggestions if prefix is not found
-            if (!node.children.get(char)) return []; 
-            
+
+        //Ensure the current prefix actually exists in the trie
+        for (const char of prefix) {
+            //Return an empty suggestion list if not
+            if (!node.children.has(char)) return results;
             node = node.children.get(char);
         }
-        return this.findWords(node, prefix);
-    }
 
-    
-    //Helper method to find all words under a given node
-    findWords(node, prefix) {
-        const words = [];
+        //Enqueue the node of the last char of the prefix
+        //path: tracks the complete string from the beginning of the prefix all the way to the currently traversed node
+        queue.push({ node, path: prefix });
 
-        //Only traverse further if less than the max allowed number of suggestions have already been retrieved
-        if(words_retrieved < MAX_SUGGESTIONS){
-            //Add to suggestions list if current char marks the end of a word
-            if (node.is_word_end) {
-                //Increment counter of words already retrieved
+        //BFS search for suggestions
+        while (queue.length > 0 && words_retrieved < MAX_SUGGESTIONS) {
+            const { node, path } = queue.shift();
+
+            //If the current node marks the end of a word and the suggestion isn't just the prefix itself, add that word
+            if (node.is_word_end && path != prefix) {
+                //Add current word to the results array
+                results.push(path);
+
+                //Increment the counter of suggestions retrieved
                 words_retrieved++;
-                words.push(prefix);
+
+                //Cease the search if MAX_SUGGESTIONS number of suggestions have been retrieved
+                if (words_retrieved >= MAX_SUGGESTIONS) break;
             }
-            //DFS traverse to children via recursion
-            for (let char in node.children) {
-                words.push(...this.findWords(node.children.get(char), prefix + char));
-            }
+
+            //Enqueue children nodes
+            node.children.forEach((child_node, char) => {
+                queue.push({ node: child_node, path: path + char });
+            });
         }
 
-        return words;
+        //Sort results by length to prioritize words of a length closer to that of the prefix
+        return results.sort((a, b) => a.length - b.length);
     }
+
 }
