@@ -5,10 +5,15 @@ document.addEventListener('DOMContentLoaded', function() {
     let root_node = new Node();
     let trie = new Trie(root_node);
 
+    //Set correct path to dictionary based on environment
+    const repo_name = "/Trie-Autocomplete";
+    const dictionary_path = "/default_dictionary.txt";
+    let isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
     //then read in the default and user created dictionaries
 
     //Retrieve the default dictionary
-    fetch('/default_dictionary.txt')
+    fetch(isLocal ? dictionary_path : repo_name + dictionary_path)
     .then(response => {
         if (!response.ok) {
             throw new Error("Network response error!");
@@ -81,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //Gets last line
         const line = lines[lines.length - 1];
-        
+
         //Define the dimensions and position of the dropdown
         const lineRect = {
             //top: rect.top + input.scrollTop + (input.clientHeight / lines.length) * (lines.length - 1),
