@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <style>
+        .autocomplete-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            width: 50%;
+            height: 500px; 
+            box-sizing: border-box; 
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none; 
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            border: 1px solid #ddd;
+            background: #fff;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .autocomplete-list li {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .autocomplete-list li:hover {
+            background-color: #eee;
+        }
+    </style>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Graph Algorithms Visualizer</title>
+    </head>
+
+    <body>
+        <script src="script.js"></script>
+        <script src="Trie.js"></script>
+
+        <div class="autocomplete-container">
+            <textarea id="input_box" placeholder="Begin typing..."></textarea>
+            <ul id="autocomplete-list" class="autocomplete-list"></ul>
+        </div>
+    </body>
+
+    
+
+</html>
