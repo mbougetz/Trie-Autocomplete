@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //Characters to ignore displaying suggestions after
     let null_chars = [" "];
 
-    //Get suggestions on keystroke
+    //Render suggestions on each keystroke
     let input = document.getElementById("input_box");
     let suggestions_box = document.getElementById("autocomplete-list");
     input.addEventListener("input", function() {
@@ -55,14 +55,14 @@ document.addEventListener('DOMContentLoaded', function() {
             suggestions_box.style.display = 'block';
 
             //Position the suggestions dropdown under the current prefix
-            positionSuggestions();
+            positionSuggestions(suggestions);
 
             //Add event listeners to suggestion items
             Array.from(suggestions_box.getElementsByClassName('suggestion-item')).forEach(item => {
                 //Allow the user to click on suggestions to replace the current prefix
                 item.addEventListener('click', () => {
                     //Replace prefix
-                    input.value = input.value.replace(new RegExp(`${prefix}\\b`), item.textContent);
+                    input.value = replacePrefix(input.value, item.textContent);
 
                     //Hide the dropdown
                     suggestions_box.style.display = 'none';
@@ -76,37 +76,64 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
 
-    //Positions the suggestion dropdown appropriately
-    function positionSuggestions() {
-        const rect = input.getBoundingClientRect();
-        const cursorPosition = input.selectionStart;
+    //Returns the text with the last word replaced
+    //!!!!! This doesn't account for going back in the input box and typing in the middle of the existing string
+    function replacePrefix(text, replacement){
+        let words = text.split(" ");
 
-        //Splits lines around newline character
-        const lines = input.value.substr(0, cursorPosition).split('\n');
+        if(words.length > 0){
+            words[words.length - 1] = replacement;
+            return words.join(" ");
 
-        //Gets last line
-        const line = lines[lines.length - 1];
+        } else return text;
 
-        //Define the dimensions and position of the dropdown
-        const lineRect = {
-            //top: rect.top + input.scrollTop + (input.clientHeight / lines.length) * (lines.length - 1),
-            top: input.scrollTop,
-            //left: rect.left + input.scrollLeft,
-            left: rect.left + cursorPosition * 8,
-            width: input.clientWidth 
-            //!!!!!!!!!!!!!!!!!! Have autosuggest box as wide as the widest of the suggestions according to current font
-        };
-    
-        //Sets dropdown position within the page
-        //suggestions_box.style.top = `${lineRect.top + parseInt(window.getComputedStyle(input).lineHeight, 10)}px`;
-        //!!!!!!!!! Magic number bad! Need to get height of current font, multiply by the number of current lines in input, and add to top styling
-        suggestions_box.style.top = `${lineRect.top + 35}px`;
-        suggestions_box.style.left = `${lineRect.left}px`;
-        suggestions_box.style.width = `${lineRect.width}px`;
     }
 
+    //Positions the suggestion dropdown appropriately
+    function positionSuggestions(suggestions) {
+        let input = document.getElementById("input_box");
 
+        //Gets the pixel width of the longest returned suggestion
+        let max_suggestion_width = 0; //Actually have this be the width of the "add to dictionary" button text later!!!!!!
+        for(let sugg of suggestions){
+            let curr_width = getTextWidth(sugg);
+            if(curr_width > max_suggestion_width) max_suggestion_width = curr_width;
+        }
+
+        //Align the dropdown with the start of the current prefix but one line downwards:
+
+        //Retrieve the x,y position in pixels of the textarea's caret
+        let caret_pos = getCaretPosition();
+
+        //Set top coord to current caret y coord + the height of the current line
+        suggestions_box.style.top = `${caret_pos[1] + getLineHeight()}px`;
+
+        //Set left coord to current caret x coord - the width of the word currently being typed
+        suggestions_box.style.left = `${caret_pos[0] - getTextWidth(getCurrPrefix(input.value))}px`;
+
+        //Set width to be the maximum width of the retrieved suggestions
+        suggestions_box.style.width = `${max_suggestion_width}px`;
+    }
 });
+
+
+//Returns the pixel width of an input string
+function getTextWidth(text, font = '16px Arial') {
+    //Create a temporary canvas element
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    //Set the font style for the context
+    context.font = font;
+
+    //Measure the width of the text
+    const width = context.measureText(text).width;
+
+
+    canvas.remove();
+
+    return width;
+}
 
 //Takes an input string and returns the last individual word
 function getCurrPrefix(text){
