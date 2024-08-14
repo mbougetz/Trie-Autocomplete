@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let suggestions_box = document.getElementById("autocomplete-list");
     input.addEventListener("input", function() {
         //Casts input to all lowercase
-        let prefix = getCurrPrefix(this.value.toLowerCase());
+        let prefix = getCurrPrefix(this.value.toLowerCase()); //!!!!!!! Case matching error preventing proper nouns from being retrieved
         let lastChar = this.value[this.value.length - 1];
 
         //Hide the box if no prefix exists or if space has been pressed, else show

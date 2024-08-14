@@ -51,8 +51,8 @@ class Trie{
         //Ensure the current prefix actually exists in the trie
         for (const char of prefix) {
             //Return an empty suggestion list if not
-            if (!node.children.has(char)) return results;
-            node = node.children.get(char);
+            if (!node.children.has(char)) return results; //!!!!!! case matching is stopping proper nouns from being retrieved!
+            node = node.children.get(char); //!!!!! Also here
         }
 
         //Enqueue the node of the last char of the prefix
@@ -64,7 +64,7 @@ class Trie{
             const { node, path } = queue.shift();
 
             //If the current node marks the end of a word and the suggestion isn't just the prefix itself, add that word
-            if (node.is_word_end && path != prefix) {
+            if (node.is_word_end && path != prefix) { //!!!! Case matching also possibly here
                 //Add current word to the results array
                 results.push(path);
 
